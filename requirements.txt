@@ -1,0 +1,18 @@
+imbalanced-learn==0.9.1
+imblearn==0.0
+matplotlib @ file:///C:/ci/matplotlib-suite_1613408055530/work
+mplfinance==0.12.7a17
+mplsoccer==1.0.6
+mpmath==1.2.1
+numpy @ file:///C:/ci/numpy_and_numpy_base_1618497418457/work
+pandas @ file:///C:/ci/pandas_1618365634936/work
+pandas-datareader==0.10.0
+plotly==5.3.1
+scikit-image==0.18.1
+scikit-learn==1.1.1
+seaborn @ file:///tmp/build/80754af9/seaborn_1608578541026/work
+statsbombpy==1.4.3
+statsmodels==0.12.2
+streamlit==1.10.0
+streamlit-aggrid==0.2.3.post2
+xgboost==1.5.2
