@@ -53,10 +53,13 @@ def app():
         
         #select the team for analysis
         teamSelect = st.selectbox(
-            "Chose the Team", Teams)
+            "Choose the Team:", Teams)
         
         
+        crest = Image.open(f'FA_WSL\{teamSelect}.png')
+        col1.image(crest)
         
+                
         teamdf = df[(df.home_team == teamSelect ) | (df.away_team == teamSelect)]
         team_match_id = teamdf["match_id"]
         
@@ -562,7 +565,7 @@ def app():
         col7.markdown("_____________________________________________________________________________")
         col7.markdown("The below map allows one to visualize shot outcomes in relation to shot location for the squad.")
         
-        shotOutcomeOption = col7.selectbox("Chose shot Type", shotOutcomeOption)
+        shotOutcomeOption = col7.selectbox("Choose shot Type", shotOutcomeOption)
         
         def shotOutcomeGraph(shotOut):
         
