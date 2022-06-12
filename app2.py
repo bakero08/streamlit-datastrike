@@ -763,7 +763,7 @@ def app():
             
             #Total goals scored by player 
             goal_df_player1 = shot_df_split_new[(shot_df_split_new['shot_outcome'] == 'Goal' ) & (shot_df_split_new['player'] == player1)]
-            goal_df_player2 = shot_df_split_new[(shot_df_split_new['shot_outcome'] == 'Goal' ) & (shot_df_split_new['player'] == player1)]
+            goal_df_player2 = shot_df_split_new[(shot_df_split_new['shot_outcome'] == 'Goal' ) & (shot_df_split_new['player'] == player2)]
             
             for i in range(len(goal_df)) :
                 if goal_df.iloc[i,num1] == 'Goal' :
