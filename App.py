@@ -55,9 +55,11 @@ def app():
         teamSelect = st.selectbox(
             "Choose the Team:", Teams)
         
-        crestName = 'FA_WSL/'+teamSelect+'.png'
+        #crestName = 'FA_WSL/'+teamSelect+'.png'
         
-        crest = Image.open(crestName)
+        #crest = Image.open(crestName)
+        
+        crest = Image.open(f'FA_WSL/{teamSelect}.png')
         col1.image(crest)
         
                 
