@@ -288,13 +288,13 @@ def app():
             if run_model:
                 xg_df = xg_model(shot_df)
         except IndexError:
-                st.info(f"Model not available for {teamSelect} data set.")        
+                st.info(f"Model not available for {teamSelect} data set hence using Statbomb xG.")        
             
         except ValueError:
-                st.info("Model not available for {teamSelect} data set.")        
+                st.info("Model not available for {teamSelect} data set hence using Statbomb xG.")        
         
         except KeyError:
-                st.info("Model not available for {teamSelect} data set.")        
+                st.info("Model not available for {teamSelect} data set hence using Statbomb xG.")        
         
         
         goal_df = shot_df_split_new[(shot_df_split_new['shot_outcome'] == 'Goal' )]
@@ -407,7 +407,6 @@ def app():
             pitch1.scatter(shot_df_pl_head1.x, shot_df_pl_head1.y,marker ='d', color='blue', alpha=0.9,ax=ax1, s =60, label = 'Header')
             ax1.legend(loc='lower right').get_texts()[0].set_color("black")
             plt.title(f"{player1}'s Shot Map ", fontsize=16, fontfamily='serif')
-            col3.markdown("This map allows one to visualize shot outcomes in relation to shot location and shot body part of an individual")
             col3.pyplot(fig1) 
             figs.append(fig1)
             

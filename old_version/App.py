@@ -37,12 +37,8 @@ def app():
         
         col2.image(image)
         
-        
         #st.write("Raw Data")
         #Code to retrieve the data from statsbomb
-        
-        #season_id = st.selectbox(
-         #   "Chose the Season", Teams)
         
         #download the competition and season data from statsbomb
         df = sb.matches(competition_id=37, season_id=4)
@@ -55,8 +51,7 @@ def app():
         teamSelect = st.selectbox(
             "Chose the Team", Teams)
         
-        
-        
+             
         teamdf = df[(df.home_team == teamSelect ) | (df.away_team == teamSelect)]
         team_match_id = teamdf["match_id"]
         
@@ -296,7 +291,7 @@ def app():
         
         
         run_model = st.button("Run xG Model")
-        st.markdown("_____________________________________________________________________________")
+        
         try:
             if run_model:
                 xg_df = xg_model(shot_df)
@@ -425,10 +420,8 @@ def app():
         draws= (h_draws + a_draws)
         losses= (h_losses + a_losses)
         points= (wins*3+draws*1+losses*0)
-        
-        
+                
         cola, colb, colc, cold, cole, colf, colg = st.columns(7)
-        st.markdown("_____________________________________________________________________________")
         
         #cola.write(f"Wins 👟  {wins}")
         cola.metric("Wins 🏆", wins )
@@ -445,13 +438,13 @@ def app():
         
         
         fig = sns.jointplot(data=mergedPlayer_finaldf, x="G_90", y="xg_90", hue = 'Player')
-        fig.fig.suptitle("Individual xG p/90 v. Goals p/90", fontsize=12, fontfamily='serif')
+        fig.fig.suptitle("Goals per 90 vs xG per 90", fontsize=12, fontfamily='serif')
         
         goal_dist = mergedPlayer_finaldf['Goal'] - mergedPlayer_finaldf['xG'] 
         
         fig3, ax = plt.subplots(figsize=[8,8])
         ax = sns.barplot(x=mergedPlayer_finaldf['Goal'] - mergedPlayer_finaldf['xG'], y='Player', data=mergedPlayer_finaldf, ax=ax)
-        plt.title("xG Difference from Expectation", fontsize=16, fontfamily='serif')
+        plt.title("xG and goal difference", fontsize=16, fontfamily='serif')
         
         
         #st.pyplot(fig)
@@ -509,7 +502,7 @@ def app():
         p.gca().add_artist(my_circle)
         circle = plt.Circle( (0,0), 0.7, color='white')
         plt.legend(labels1,loc="center left",bbox_to_anchor=(1,0, 5, 1))
-        plt.title(f"{teamSelect} Shot Outcomes", fontsize=16, fontfamily='serif')
+        plt.title("Shot Outcomes", fontsize=16, fontfamily='serif')
         plt.tight_layout()
         #plt.show()
         
@@ -529,102 +522,26 @@ def app():
         
        
         
-        #pitch_st = Pitch(pitch_type='statsbomb', half = True, pitch_color='#c7d5cc', line_color='white')
-        #fig_st, ax_st = pitch_st.draw(figsize=(8, 8), constrained_layout=True, tight_layout=False)
-        #
-        #plt.scatter(shot_df_split_new[shot_df_split_new['shot_outcome']=='Goal']['x'],shot_df_split_new[shot_df_split_new['shot_outcome']=='Goal']['y'],
-        #s =np.sqrt(shot_df_split_new[shot_df_split_new['shot_outcome']=='Goal']["shot_statsbomb_xg"])*100 , marker = 'o', facecolor='orange',edgecolor='black', alpha=0.9, label = 'Goal')
-        #plt.title(f"{teamSelect} Shot Map")
-        #
-        #pitch_st.scatter(shot_df_split_new[shot_df_split_new['shot_outcome']!='Goal']['x'],shot_df_split_new[shot_df_split_new['shot_outcome']!='Goal']['y'], 
-        #s=np.sqrt(shot_df_split_new[shot_df_split_new['shot_outcome']!='Goal']['shot_statsbomb_xg'])*100, marker='o', alpha=0.6,label = 'Shots', edgecolor='black', facecolor='grey', ax=ax_st)
-        #ax_st.legend(loc='lower right')
-        #ax_st.text(63,70,'Goals : '+str(len(shot_df_split_new[shot_df_split_new['shot_outcome']=='Goal'])), weight='bold', size=15)
-        #ax_st.text(63,74,f"xG : {round(sum(shot_df_split_new['shot_statsbomb_xg']),2)}", weight='bold', size=15)
-        #ax_st.text(63,78,'Total Shots : '+str(len(shot_df_split_new)), weight='bold', size=15)
+        pitch_st = Pitch(pitch_type='statsbomb', half = True, pitch_color='#c7d5cc', line_color='white')
+        fig_st, ax_st = pitch_st.draw(figsize=(8, 8), constrained_layout=True, tight_layout=False)
         
+        plt.scatter(shot_df_split_new[shot_df_split_new['shot_outcome']=='Goal']['x'],shot_df_split_new[shot_df_split_new['shot_outcome']=='Goal']['y'],
+        s =np.sqrt(shot_df_split_new[shot_df_split_new['shot_outcome']=='Goal']["shot_statsbomb_xg"])*100 , marker = 'o', facecolor='orange',edgecolor='black', alpha=0.9, label = 'Goal')
         
-        
+        pitch_st.scatter(shot_df_split_new[shot_df_split_new['shot_outcome']!='Goal']['x'],shot_df_split_new[shot_df_split_new['shot_outcome']!='Goal']['y'], 
+        s=np.sqrt(shot_df_split_new[shot_df_split_new['shot_outcome']!='Goal']['shot_statsbomb_xg'])*100, marker='o', alpha=0.6, edgecolor='black', facecolor='grey', ax=ax_st)
+        ax_st.legend(loc='lower right').get_texts()[0].set_color("black")
+        ax_st.text(63,70,'GOALS : '+str(len(shot_df_split_new[shot_df_split_new['shot_outcome']=='Goal'])), weight='bold', size=15)
+        ax_st.text(63,74,f"xG : {round(sum(shot_df_split_new['shot_statsbomb_xg']),2)}", weight='bold', size=15)
+        ax_st.text(63,78,'SHOTS : '+str(len(shot_df_split_new)), weight='bold', size=15)
         
         col6, col7 = st.columns(2)
-        col6.markdown("The scatter below polt allows one to assess the normalized goal scoring performance of all players in a given squad who scored a goal during the season. Keep in mind that players with lower xG and goals tend to be defenders while attackers have a higher xg and goals p/90 value.")
         col6.pyplot(fig)  
-        col6.markdown("_________________________________________________________________________")
         col7.pyplot(fig1)
-        col7.markdown("The donut chart above includes a cumulative breakdown of a team’s shot outcome")
         
         
-        
-        shotOutcomesVal = shot_df_split_new['shot_outcome'].unique()
-        
-        shotOutcomeOption = np.insert(shotOutcomesVal,0,'All')
-        
-        col7.markdown("_____________________________________________________________________________")
-        col7.markdown("The below map allows one to visualize shot outcomes in relation to shot location for the squad.")
-        
-        shotOutcomeOption = col7.selectbox("Chose shot Type", shotOutcomeOption)
-        
-        def shotOutcomeGraph(shotOut):
-        
-            if shotOut == 'All':
-            
-                pitch_st = Pitch(pitch_type='statsbomb', half = True, pitch_color='#c7d5cc', line_color='white')
-                fig_st, ax_st = pitch_st.draw(figsize=(8, 8), constrained_layout=True, tight_layout=False)
-                
-                plt.scatter(shot_df_split_new[shot_df_split_new['shot_outcome']=='Goal']['x'],shot_df_split_new[shot_df_split_new['shot_outcome']=='Goal']['y'],
-                s =np.sqrt(shot_df_split_new[shot_df_split_new['shot_outcome']=='Goal']["shot_statsbomb_xg"])*100 , marker = 'o', facecolor='orange',edgecolor='black', alpha=0.9, label = 'Goal')
-                plt.title(f"{teamSelect} Shot Map")
-                
-                pitch_st.scatter(shot_df_split_new[shot_df_split_new['shot_outcome']!='Goal']['x'],shot_df_split_new[shot_df_split_new['shot_outcome']!='Goal']['y'], 
-                s=np.sqrt(shot_df_split_new[shot_df_split_new['shot_outcome']!='Goal']['shot_statsbomb_xg'])*100, marker='o', alpha=0.6,label = 'Shots', edgecolor='black', facecolor='grey', ax=ax_st)
-                ax_st.legend(loc='lower right')
-                ax_st.text(63,70,'Goals : '+str(len(shot_df_split_new[shot_df_split_new['shot_outcome']=='Goal'])), weight='bold', size=15)
-                ax_st.text(63,74,f"xG : {round(sum(shot_df_split_new['shot_statsbomb_xg']),2)}", weight='bold', size=15)
-                ax_st.text(63,78,'Total Shots : '+str(len(shot_df_split_new)), weight='bold', size=15)
-                col9.pyplot(fig_st)
-            
-            
-        
-            elif shotOut == 'Goal':
-                
-                pitch_st = Pitch(pitch_type='statsbomb', half = True, pitch_color='#c7d5cc', line_color='white')
-                fig_st, ax_st = pitch_st.draw(figsize=(8, 8), constrained_layout=True, tight_layout=False)
-                
-                plt.scatter(shot_df_split_new[shot_df_split_new['shot_outcome']=='Goal']['x'],shot_df_split_new[shot_df_split_new['shot_outcome']=='Goal']['y'],
-                s =np.sqrt(shot_df_split_new[shot_df_split_new['shot_outcome']=='Goal']["shot_statsbomb_xg"])*100 , marker = 'o', facecolor='orange',edgecolor='black', alpha=0.9, label = 'Goal')
-                
-                plt.title(f"{teamSelect} Shot Map")
-                ax_st.legend(loc='lower right')
-                ax_st.text(63,70,'Goals : '+str(len(shot_df_split_new[shot_df_split_new['shot_outcome']=='Goal'])), weight='bold', size=15)
-                #ax_st.text(63,74,f"xG : {round(sum(shot_df_split_new['shot_statsbomb_xg']),2)}", weight='bold', size=15)
-                ax_st.text(63,78,'Total Shots : '+str(len(shot_df_split_new)), weight='bold', size=15)
-                col9.pyplot(fig_st)
-        
-            
-            else:
-            
-                pitch_st = Pitch(pitch_type='statsbomb', half = True, pitch_color='#c7d5cc', line_color='white')
-                fig_st, ax_st = pitch_st.draw(figsize=(8, 8), constrained_layout=True, tight_layout=False)
-                
-                plt.scatter(shot_df_split_new[shot_df_split_new['shot_outcome']==f'{shotOut}']['x'],shot_df_split_new[shot_df_split_new['shot_outcome']==f'{shotOut}']['y'], 
-                s=np.sqrt(shot_df_split_new[shot_df_split_new['shot_outcome']==f'{shotOut}']['shot_statsbomb_xg'])*100, marker='o', facecolor='grey' ,edgecolor='black', alpha=0.6,label = 'Shots' )
-                
-                plt.title(f"{teamSelect} Shot Map")
-                ax_st.legend(loc='lower right')
-                ax_st.text(63,70,f'{shotOut} Shots : '+str(len(shot_df_split_new[shot_df_split_new['shot_outcome']==f'{shotOut}'])), weight='bold', size=15)
-                #ax_st.text(63,74,f"xG : {round(sum(shot_df_split_new['shot_statsbomb_xg']),2)}", weight='bold', size=15)
-                ax_st.text(63,78,'Total Shots : '+str(len(shot_df_split_new)), weight='bold', size=15)
-                col9.pyplot(fig_st)
-           
         col8, col9 = st.columns((2))
-        
-        #col9.markdown("The below map allows one to visualize shot outcomes in relation to shot location for the squad.")
-        shotOutcomeGraph(shotOutcomeOption)
-        
         col8.pyplot(fig3)
-        col8.markdown("The above histogram allows one to analyze which players are over or under performing their expected goals metric within a squad")
         
-        
-        
-        #col9.pyplot(fig_st)
-        
+        col9.pyplot(fig_st)
+        #col9.markdown("AHSJHSDASHK")
