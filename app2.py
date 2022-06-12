@@ -42,7 +42,7 @@ def app():
         
         #select the team for analysis
         teamSelect = st.selectbox(
-            "Chose the Team", Teams)
+            "Choose the Team", Teams)
         
              
         teamdf = df[(df.home_team == teamSelect ) | (df.away_team == teamSelect)]
@@ -362,19 +362,14 @@ def app():
        
         #select the player for analysis
         players = shot_df_split_new["player"].unique()
-        
-        #playerSelect = st.selectbox(
-        #    "Chose the Player",
-        #    players        )
-
-        #st.write(f"You selected {playerSelect}")
-        
+             
         
         player_choice = st.multiselect(
     "Choose Players:", players, default=players[0])
         
-        st.write(f"Numbers of players selected {len(player_choice)}")
-        st.write(f"You selected {player_choice}")
+        st.write(f"Numbers of players selected: {len(player_choice)}")
+        st.markdown("________________________________________________"
+        #st.write(f"You selected {player_choice}")
         #shots from single player
         
         
@@ -722,9 +717,11 @@ def app():
             labels1 = playerPie1['shot_outcome']
             lenX = len(playerPie1['count'])
             colors1 = ['#ff9999','#66b3ff','#99ff99','#ffcc99','purple', 'red', 'orange', 'yellow']
-            plt.pie(x=playerPie1['count'], autopct="%.1f%%", labels=labels1, explode=[0.04]*lenX, pctdistance=0.7, colors=colors1, shadow=True, \
+            
+            plt.pie(x=playerPie1['count'], autopct="%.1f%%", explode=[0.01]*lenX, pctdistance=0.7, colors=colors1, \
             textprops=dict(fontsize=16))
-            plt.title("Shot Outcomes", fontsize=26, fontfamily='serif')
+            plt.legend(labels1,loc="center left",bbox_to_anchor=(1,0, 5, 1))
+            plt.title("Shot Outcomes", fontsize=16, fontfamily='serif')
             plt.tight_layout()
             
             playershots2 = shot_df_split_pl2[shot_df_split_pl2.type=='Shot']
@@ -734,10 +731,13 @@ def app():
             labels2 = playerPie2['shot_outcome']
             lenX = len(playerPie2['count'])
             colors2 = ['#ff9999','#66b3ff','#99ff99','#ffcc99','purple', 'red', 'orange', 'yellow']
-            plt.pie(x=playerPie2['count'], autopct="%.1f%%", labels=labels2, explode=[0.04]*lenX, pctdistance=0.7, colors=colors2, shadow=True, \
+            
+            plt.pie(x=playerPie2['count'], autopct="%.1f%%", explode=[0.01]*lenX, pctdistance=0.7, colors=colors2, \
             textprops=dict(fontsize=16))
-            plt.title("Shot Outcomes", fontsize=26, fontfamily='serif')
+            plt.legend(labels2,loc="center left",bbox_to_anchor=(1,0, 5, 1))
+            plt.title("Shot Outcomes", fontsize=16, fontfamily='serif')
             plt.tight_layout()
+            
             
             
             col7, col8 = st.columns(2)
