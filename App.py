@@ -56,7 +56,7 @@ def app():
             "Choose the Team:", Teams)
         
         
-        crest = Image.open('{teamSelect}.png')
+        crest = Image.open('f"FA_WSL{teamSelect}.png"')
         col1.image(crest)
         
                 
