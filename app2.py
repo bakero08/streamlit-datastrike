@@ -368,7 +368,7 @@ def app():
     "Choose Players:", players, default=players[0])
         
         st.write(f"Numbers of players selected: {len(player_choice)}")
-        st.markdown("________________________________________________"
+        st.markdown("________________________________________________")
         #st.write(f"You selected {player_choice}")
         #shots from single player
         
