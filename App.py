@@ -119,11 +119,12 @@ def app():
             shot_df_split_new = shot_df
             shot_df_split_export = shot_df_split_new
             shot_df_split_new_ex = shot_df_split_new
+            
             ##PREFERENCE FOOT CODE
-    
+        
             pref_foot = shot_df_split_new[['player','shot_body_part']].copy()
             
-            pref = pref_foot.groupby(["player",'shot_body_part'])["shot_body_part"].count()
+            pref = pref_foot.groupby(['player','shot_body_part'])['shot_body_part'].count()
             abc =pref.unstack(level=1)
             
             abc = abc.reset_index(level=0)
@@ -132,13 +133,13 @@ def app():
             abc["player_pref_foot"] = 0
             for i in range(len(abc)) :
                 if float(abc.iloc[i,2]) >  float(abc.iloc[i,3]) :
-                    abc.iloc[i,4] = 'Left'
+                    abc.iloc[i,4] = 'Left Foot'
                 else:
-                    abc.iloc[i,4] = 'Right'
+                    abc.iloc[i,4] = 'Right Foot'
             
                     
             pref_foot_player = abc[['player','player_pref_foot']].copy()
-            shot_df_split_ex=shot_df_split_new_ex.merge(pref_foot_player,left_on="player",right_on="player")
+            shot_df_split_ex=pd.merge(shot_df_split_new_ex,pref_foot_player,on = "player")
             
             player_pref_foot = shot_df_split_ex["player_pref_foot"]
             
@@ -153,7 +154,8 @@ def app():
             shot_df_split_new['y'] = 80-shot_df_split_new['y']
             shot_df_split_new[['endx', 'endy', 'endz']] = shot_df['shot_end_location'].apply(pd.Series)
             shot_df_split_new['endy'] = 80-shot_df_split_new['endy']
-    
+            
+            shot_df_split_new['distance_meters'] =  round(((120 - shot_df_split_new['x'] )**2 + (40 - shot_df_split_new['y'] )**2)**0.5,2)
             shot_df_split_new['distance'] =  ((120 - shot_df_split_new['x'] )**2 + (40 - shot_df_split_new['y'] )**2)**0.5
             #shot_df_split_new
             
@@ -168,14 +170,14 @@ def app():
                     shot_df_split_new.iloc[i,-1] = 'Long Range'
                 else:
                     shot_df_split_new.iloc[i,-1] ='more_35yd'
-
-    
+            
+            
                         
-            shotDistance = {'Close Range':4, 
-                'Penalty Box':3, 
-                'Outside Box':2, 
-                'Long Range':1, 
-                'more_35yd':0.5}
+            shotDistance = {'Close Range':.8, 
+                'Penalty Box':.6, 
+                'Outside Box':.2, 
+                'Long Range':.1, 
+                'more_35yd':0.1}
             shot_df_split_new['distance'] = shot_df_split_new.distance.map(shotDistance)
             
             
@@ -191,7 +193,7 @@ def app():
             #        shot_df_split_new.iloc[i,114] = 'Long Range'
             #    else:
             #        shot_df_split_new.iloc[i,114] ='more_35yd'
-    
+            
             
             
             shot_df_split_new.loc[(shot_df_split_new.shot_first_time) == True, 'shot_first_time'] = 1
@@ -199,7 +201,7 @@ def app():
                     
             shot_df_split_new.loc[(shot_df_split_new.shot_one_on_one) == True, 'shot_one_on_one'] = 1
             shot_df_split_new.loc[(shot_df_split_new.shot_one_on_one).isna(), 'shot_one_on_one'] = 0
-
+            
             shot_df_split_new.loc[(shot_df_split_new.under_pressure) == True, 'under_pressure'] = 1
             shot_df_split_new.loc[(shot_df_split_new.under_pressure).isna(), 'under_pressure'] = 0
             
@@ -231,14 +233,45 @@ def app():
             shot_df_split_new['outcome_shot'] = shot_df_split_new.outcome_shot.map(shotOutcome)
             
             
-            dataraw = shot_df_split_new[['distance','player_pref_foot','shot_body_part','shot_type','shot_technique','outcome_shot','shot_first_time','shot_one_on_one','under_pressure','shot_open_goal']].copy()
-            #dataraw = shot_df_split_new[['distance','player_pref_foot','shot_body_part','shot_type','shot_technique','shot_first_time','shot_one_on_one','under_pressure','shot_open_goal']].copy()
+            shot_df_split_new['shot_technique_w'] = shot_df_split_new['shot_technique']
+            
+            shotTechnique = {'Normal':.7, 
+            'Half Volley':.5, 
+            'Volley':.4, 
+            'Backheel':.2,
+            'Lob': .4}
+            
+            shot_df_split_new['shot_technique_w'] = shot_df_split_new.shot_technique_w.map(shotTechnique)
+            
+            
+            dataraw = shot_df_split_new[['distance','shot_type','shot_technique_w','outcome_shot','shot_first_time','shot_one_on_one','under_pressure','shot_open_goal']].copy()
+            #dataraw = 
             #dataraw        
             
             #data = pd.get_dummies(dataraw, columns=['distance','player_pref_foot', 'shot_body_part','shot_type', 'shot_technique'])
-            data = pd.get_dummies(dataraw, columns=['player_pref_foot', 'shot_body_part','shot_type', 'shot_technique'])
+            data = pd.get_dummies(dataraw, columns=[ 'shot_type'])
             #data
             
+            num3 = shot_df_split_new.columns.get_loc("player_pref_foot")
+            num4 = shot_df_split_new.columns.get_loc("shot_body_part")
+            shot_df_split_new['is_pref_foot'] = 0
+            
+            for i in range(len(shot_df_split_new)) :
+                if shot_df_split_new.iloc[i,num3] ==  shot_df_split_new.iloc[i,num4]:
+                    shot_df_split_new.iloc[i,-1] =1
+                else:
+                    shot_df_split_new.iloc[i,-1] =0
+            
+            shot_df_split_new['is_pref_foot_w'] = shot_df_split_new['is_pref_foot']
+            
+            
+            
+            footW = {1:.7, 
+            0:.3}
+            shot_df_split_new['is_pref_foot_w'] = shot_df_split_new.is_pref_foot_w.map(footW)
+            
+            data['is_pref_foot'] = shot_df_split_new['is_pref_foot']
+            data['is_pref_foot_w'] = shot_df_split_new['is_pref_foot_w']
             
             num = shot_df_split_new.columns.get_loc("shot_outcome")
             shot_df_split_new['is_goal'] = 0
@@ -248,13 +281,14 @@ def app():
                     shot_df_split_new.iloc[i,-1] =1
                 else:
                     shot_df_split_new.iloc[i,-1] =0
-                        
+            
+                    
             data['is_goal'] = shot_df_split_new['is_goal']
             #data
             datatest = data
             
             #train_test_split
-    
+            
             X = datatest.iloc[:,:-1]
             y = datatest.iloc[:,-1]
             
@@ -278,8 +312,8 @@ def app():
             #
             #from sklearn.metrics import classification_report
             #print(classification_report(y_test,model.predict(X_test)))
-    
-    
+            
+            
             prob = model.predict_proba(X)
             
             data['xg'] = prob.tolist() 
@@ -290,10 +324,10 @@ def app():
             shot_df_split_new['xg_1'] = data['xg_1']
             #shot_df_split_export['distance'] = data['distance']
             
-            shot_df_split_out = shot_df_split_new[['player','location','shot_end_location','player_pref_foot','distance','shot_outcome','is_goal','shot_statsbomb_xg','xg_1']].copy()
-            
-            AgGrid(shot_df_split_out.head(20))
-            
+            shot_df_split_out = shot_df_split_new[['player','location','shot_body_part','shot_end_location','shot_technique','under_pressure','shot_one_on_one','is_pref_foot','shot_first_time','distance_meters','shot_outcome','is_goal','shot_statsbomb_xg','xg_1']].copy()
+    
+            AgGrid(shot_df_split_out.tail(20))
+                
             return shot_df_split_export
         #####################33
         
@@ -301,19 +335,6 @@ def app():
         
         
         
-        run_model = st.button("Run xG Model")
-        st.markdown("_____________________________________________________________________________")
-        try:
-            if run_model:
-                xg_df = xg_model(shot_df)
-        except IndexError:
-                st.info(f"Model not available for {teamSelect} data set hence using Statbomb xG.")        
-            
-        except ValueError:
-                st.info("Model not available for {teamSelect} data set hence using Statbomb xG.")        
-        
-        except KeyError:
-                st.info("Model not available for {teamSelect} data set hence using Statbomb xG.")        
         
         
         goal_df = shot_df_split_new[(shot_df_split_new['shot_outcome'] == 'Goal' )]
@@ -645,10 +666,6 @@ def app():
         AgGrid(player_stats_df)
         
         
-        
-        
-        
-        
         ##EXPORT PDF 
         
         st.markdown("**Export Visualisations as Report**")
@@ -670,6 +687,25 @@ def app():
             html = create_download_link(pdf.output(dest="S").encode("latin-1"), "report")
             st.markdown(html, unsafe_allow_html=True)
             
+        
+        st.markdown("_____________________________________________________________________________")
+        st.markdown("**Adjusted xG model**")
+        
+        st.markdown(" The generated table will show an adjusted xG (xg_1) for the shots along with the variables considered for it.")
+        run_model = st.button("Run xG Model")
+        
+        
+        try:
+            if run_model:
+                xg_df = xg_model(shot_df)
+        except IndexError:
+                st.info(f"Model not available for {teamSelect} data set hence using Statbomb xG.")        
+            
+        except ValueError:
+                st.info("Model not available for {teamSelect} data set hence using Statbomb xG.")        
+        
+        except KeyError:
+                st.info("Model not available for {teamSelect} data set hence using Statbomb xG.")        
         
         
         #col9.pyplot(fig_st)

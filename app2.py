@@ -280,24 +280,7 @@ def app():
             AgGrid(shot_df_split_out.head(20))
             
             return shot_df_split_export
-        #####################33
-        
-             
-        
-        
-        run_model = st.button("Run xG Model")
-        
-        try:
-            if run_model:
-                xg_df = xg_model(shot_df)
-        except IndexError:
-                st.info(f"Model not available for {teamSelect} data set.")        
-            
-        except ValueError:
-                st.info("Model not available for {teamSelect} data set.")        
-        
-        except KeyError:
-                st.info("Model not available for {teamSelect} data set.")        
+        #####################
         
         
         goal_df = shot_df_split_new[(shot_df_split_new['shot_outcome'] == 'Goal' )]
