@@ -573,6 +573,9 @@ def app():
         
         #### PLAYER STATS TABLE
         
+        
+        col8.markdown("Below table describes .")
+        
         top_goal_df = shot_df_split_new[(shot_df_split_new['shot_outcome'] == 'Goal' )] 
 
         num1 = shot_df_split_new.columns.get_loc("shot_outcome")
@@ -594,6 +597,16 @@ def app():
         
         player_stats_df = pd.merge(player_xg,player_goals, on="player",  how='left')
         player_stats_df = player_stats_df.fillna(0)
+        player_stats_df['shot_statsbomb_xg'] = round(player_stats_df.shot_statsbomb_xg,2)
+                
+        player_stats_df['Goal p/90'] = round(mergedPlayer_df.Goal/mergedPlayer_df['90s'],2)
+        
+        player_stats_df['xG p/90'] = round(player_stats_df.shot_statsbomb_xg/mergedPlayer_df['90s'],2)
+        
+        player_stats_df['xG Difference'] = round(mergedPlayer_df.Goal- player_stats_df.shot_statsbomb_xg,2)
+        
+        player_stats_df = player_stats_df.fillna(0)        
+
         
         total_shot_df = shot_df_split_new 
         
@@ -609,7 +622,23 @@ def app():
         player_stats_df = pd.merge(player_stats_df,total_shot_df, on="player",  how='left')
         player_stats_df = player_stats_df.fillna(0)
         
-        player_stats_df["Shooting Efficiency"] = (player_stats_df["Goal"]/player_stats_df["shots"])*100
+        player_stats_df["Conversion Rate%"] = round((player_stats_df["Goal"]/player_stats_df["shots"])*100,2)
+        
+        onT_df = shot_df_split_new[(shot_df_split_new['shot_outcome'] == 'Goal' ) | (shot_df_split_new['shot_outcome'] == 'Saved')  | (shot_df_split_new['shot_outcome'] == 'Saved to Post') ]
+        
+        for i in range(len(onT_df)) :
+            onT_df["Shots on Target"] = 1
+        
+        onT_df = onT_df.groupby(['player'])['Shots on Target'].sum()
+        onT_df = onT_df.to_frame().reset_index()
+        onT_df = onT_df.sort_values('Shots on Target', ascending =False)
+        
+        player_stats_df = pd.merge(player_stats_df,onT_df, on="player",  how='left')
+        player_stats_df = player_stats_df.fillna(0)        
+        
+        player_stats_df["SoT %"] = round((player_stats_df["Shots on Target"]/player_stats_df["shots"])*100,2)
+        #player_stats_df = player_stats_df.drop(['Shots on Target'], axis=1)
+        
         
         AgGrid(player_stats_df)
         
