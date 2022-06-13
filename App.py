@@ -480,6 +480,7 @@ def app():
         figs.append(fig)
         col6.markdown("The scatter plot above allows one to assess the normalized goal scoring performance of all players in a given squad who scored a goal during the season.")
         col6.markdown("_________________________________________________________________________")
+        col6.markdown("The bar chart below allows one to analyze which players are over or under performing their expected goals metric within a squad.")
         col7.pyplot(fig1)
         figs.append(fig1)
         col7.markdown("The donut chart above includes a cumulative breakdown of a team’s shot outcome.")
@@ -564,17 +565,19 @@ def app():
         
         #col9.markdown("The below map allows one to visualize shot outcomes in relation to shot location for the squad.")
         fig_shotmap = shotOutcomeGraph(shotOutcomeOption)
-        
+            
         col8.pyplot(fig2)
         #figs.append(fig2)
         figs.append(fig_shotmap)
-        col8.markdown("The above bar chart allows one to analyze which players are over or under performing their expected goals metric within a squad.")
+        
         
         
         #### PLAYER STATS TABLE
         
         
-        col8.markdown("Below table describes .")
+                
+        col8.markdown("**Shot Performance Overview**")
+        col8.markdown("This table provides users with the general shooting statistics of a squad throughout the 2018/19 season.")
         
         top_goal_df = shot_df_split_new[(shot_df_split_new['shot_outcome'] == 'Goal' )] 
 
@@ -638,7 +641,6 @@ def app():
         
         player_stats_df["SoT %"] = round((player_stats_df["Shots on Target"]/player_stats_df["shots"])*100,2)
         #player_stats_df = player_stats_df.drop(['Shots on Target'], axis=1)
-        
         
         AgGrid(player_stats_df)
         
