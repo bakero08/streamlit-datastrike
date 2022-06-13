@@ -602,7 +602,7 @@ def app():
                 
                 colx1,colx2,colx3,colx4,colx5,colx6,colx7 = st.columns(7)
                 colx2.markdown("**(Match ID)**")
-                figs.append(axis)
+                figs.append(fig_trend)
             else:
                 st.info("No goals for the player, Hence no Expected Goals VS Actual Goals Per match graph available")
             
