@@ -43,6 +43,9 @@ def app():
         #select the team for analysis
         teamSelect = st.selectbox(
             "Choose the Team", Teams)
+            
+        crest = Image.open(f'FA_WSL\{teamSelect}.png')
+        col1.image(crest)
         
              
         teamdf = df[(df.home_team == teamSelect ) | (df.away_team == teamSelect)]
@@ -402,21 +405,22 @@ def app():
             pitch1.scatter(shot_df_pl_head1.x, shot_df_pl_head1.y,marker ='d', color='blue', alpha=0.9,ax=ax1, s =40, label = 'Header')
             ax1.legend(loc='lower right').get_texts()[0].set_color("black")
             plt.title(f"{player1}'s Shot Map ", fontsize=16, fontfamily='serif')
-            col3.markdown("This map allows one to visualize shot outcomes in relation to shot location and shot body part of an individual")
+            col3.markdown("This map allows one to visualize shot outcomes in relation to shot location and shot body part of an individual.")
             col3.pyplot(fig1) 
             figs.append(fig1)
             
             hmPitch1 = VerticalPitch(half = True, pitch_type='statsbomb', line_zorder=2, pitch_color='#22312b', line_color='#efefef')
             hmFig1, hmAxs1 = hmPitch1.grid(figheight=9, title_height=0.05, endnote_space=0, axis=False, title_space=0, grid_height=0.8, endnote_height=0.05)
             hmFig1.set_facecolor('white')
-
+            plt.title(f"{player1}'s Shot Density Heat Map", fontsize=16, fontfamily='serif')
             bin_statistic1 = hmPitch1.bin_statistic(shot_df_split_pl1.x, shot_df_split_pl1.y, statistic='count', bins=(20, 20)) 
             bin_statistic1['statistic'] = gaussian_filter(bin_statistic1['statistic'], 1)
             pcm1 = hmPitch1.heatmap(bin_statistic1, ax=hmAxs1['pitch'], cmap='hot', edgecolors='#22312b')
             cbar1 = hmFig1.colorbar(pcm1, ax=hmAxs1['pitch'], shrink=0.6)
             cbar1.outline.set_edgecolor('#efefef')
-            plt.title(f"{player1}'s Shot Density Heat Map", fontsize=16, fontfamily='serif')
+            col4.markdown("This heat map allows one to visualize shot volume and density based on location for an individual.")
             col4.pyplot(hmFig1)  
+            
             figs.append(hmFig1)
             
             ##SHOT OUTCOME
@@ -430,10 +434,12 @@ def app():
             plt.pie(x=playerPie1['count'], autopct="%.1f%%", explode=[0.01]*lenX, pctdistance=0.7, colors=colors1, \
             textprops=dict(fontsize=16))
             plt.legend(labels1,loc="center left",bbox_to_anchor=(1,0, 5, 1))
-            plt.title("Shot Outcomes", fontsize=16, fontfamily='serif')
+            plt.title(f"{player1}'s Shot Outcomes", fontsize=16, fontfamily='serif')
             plt.tight_layout()
             
             col5,col6 = st.columns(2)
+            col5.markdown("________________________________________________")
+            col5.markdown("This pie chart displays a cumulative breakdown of an individual’s shot outcomes.")
             col5.pyplot(figSO1)
             figs.append(figSO1)
             
@@ -529,9 +535,13 @@ def app():
                             columns=['Proportion', 'Player','Team' ])
             
                 
-            ax = prop_df.plot(color= ['#24b1d1', '#ae24d1'], x='Proportion', kind='barh', stacked=True, figsize=(10, 6),title=f'{player1} Contribution', ax=ax)
-                    
+            ax = prop_df.plot(color= ['#24b1d1', '#ae24d1'], x='Proportion', kind='barh', stacked=True,figsize=(10, 6), ax=ax)
+            plt.xlabel('Percentage %', fontsize=12)
+            plt.title(f'{player1} Contribution', fontsize=16, fontfamily='serif')        
+            col6.markdown("________________________________________________")
+            col6.markdown("This stacked bar chart is used to visualize an individual’s contribution against a team’s performance.")
             col6.pyplot(fig_stk)
+            
             figs.append(fig_stk)
             
             
@@ -558,7 +568,7 @@ def app():
                 
                 merged_goal_df = pd.merge(Expected_goals, actual_goals,on="match_id",  how='left')
                 merged_df = merged_goal_df.fillna(0)
-                merged_df['g_c'] = 0
+                merged_df['Goals'] = 0
                 
                 s = 0
                 for i in range(len(merged_df)):
@@ -566,14 +576,14 @@ def app():
                     merged_df.iloc[i,3] = s
                 
                 
-                merged_df['xg_c'] = 0
+                merged_df['xG'] = 0
                 s = 0
                 for i in range(len(merged_df)):
                     s+= merged_df.iloc[i,1]
                     merged_df.iloc[i,4] = s
                 
-                actual_goals_c = merged_df.groupby(['match_id'])['g_c'].sum()
-                Expected_goals_c = merged_df.groupby(['match_id'])['xg_c'].sum()
+                actual_goals_c = merged_df.groupby(['match_id'])['Goals'].sum()
+                Expected_goals_c = merged_df.groupby(['match_id'])['xG'].sum()
                 
                 
                 summary = pd.concat([actual_goals_c, Expected_goals_c], axis=1)
@@ -585,15 +595,20 @@ def app():
                 axis.set_title('Expected Goals VS Actual Goals Per match')
                 
                 cols, colt = st.columns(2)
-                
+                cols.markdown("________________________________________________")
+                cols.markdown("This visualization is used to assess player shooting performance over a given period of matches.")
                 #cols.pyplot(fig_trend)
                 cols.line_chart(summary)
+                
+                colx1,colx2,colx3,colx4,colx5,colx6,colx7 = st.columns(7)
+                colx2.markdown("**(Match ID)**")
                 figs.append(axis)
             else:
                 st.info("No goals for the player, Hence no Expected Goals VS Actual Goals Per match graph available")
             
             
-            export_as_pdf = st.button("Export Visualisations as Report")
+            st.markdown("**Export Visualisations as Report**")
+            export_as_pdf = st.button("Export as pdf")
             
             def create_download_link(val, filename):
                 b64 = base64.b64encode(val)  # val looks like b'...'
@@ -632,14 +647,6 @@ def app():
             shot_df_pl_right1 = shot_df_split_pl1.loc[(shot_df_split_pl1['shot_body_part'] == 'Right Foot')]
             shot_df_pl_head1 = shot_df_split_pl1.loc[(shot_df_split_pl1['shot_body_part'] == 'Head')]
     
-            #leftShots = len(shot_df_pl_left)
-            #rightShots = len(shot_df_pl_right)
-            #headers = len(shot_df_pl_head)
-            
-            #st.write(f"Number of left footed shots : {leftShots} ")
-            #st.write(f"Number of right footed shots : {rightShots} ")
-            #st.write(f"Number of headers  : {headers} ")
-            
             
             shot_df_split_pl2 = shot_df_split_new.loc[(shot_df_split_new['player'] == player2)]
     
@@ -647,15 +654,11 @@ def app():
             shot_df_pl_right2 = shot_df_split_pl2.loc[(shot_df_split_pl2['shot_body_part'] == 'Right Foot')]
             shot_df_pl_head2 = shot_df_split_pl2.loc[(shot_df_split_pl2['shot_body_part'] == 'Head')]
     
-            #leftShots = len(shot_df_pl_left)
-            #rightShots = len(shot_df_pl_right)
-            #headers = len(shot_df_pl_head)
-            
+    
             col3, col4 = st.columns(2)
             
             pitch1 = VerticalPitch(half = True, pitch_type='statsbomb', pitch_color='white', line_color='#c7d5cc' )
             fig1, ax1 = pitch1.draw(figsize=(8, 6), constrained_layout=True, tight_layout=False)
-            #fig.set_facecolor('#22312b')
             
             pitch1.scatter(shot_df_pl_left1.x, shot_df_pl_left1.y,marker ='^', color='black', alpha=0.9,edgecolor='black', ax=ax1, s =40, label = 'Left Footed')
             pitch1.scatter(shot_df_pl_right1.x, shot_df_pl_right1.y,marker ='P', color='red', alpha=0.9, ax=ax1, s =40, label = 'Right Footed')
@@ -663,13 +666,13 @@ def app():
             ax1.legend(loc='lower right').get_texts()[0].set_color("black")
             plt.title(f"{player1}'s Shot Map ")
             col3.pyplot(fig1) 
+            #st.markdown("________________________________________________")
             figs.append(fig1)
             
             
             ##PLAYER 2
             pitch2 = VerticalPitch(half = True, pitch_type='statsbomb', pitch_color='white', line_color='#c7d5cc' )
             fig2, ax2 = pitch2.draw(figsize=(8, 6), constrained_layout=True, tight_layout=False)
-            #fig.set_facecolor('#22312b')
               
             pitch2.scatter(shot_df_pl_left2.x, shot_df_pl_left2.y,marker ='^', color='black', alpha=0.9,edgecolor='black', ax=ax2, s =60, label = 'Left Footed')
             pitch2.scatter(shot_df_pl_right2.x, shot_df_pl_right2.y,marker ='P', color='red', alpha=0.9, ax=ax2, s =60, label = 'Right Footed')
@@ -677,6 +680,7 @@ def app():
             ax2.legend(loc='lower right').get_texts()[0].set_color("black") 
             plt.title(f"{player2}'s Shot Map ")            
             col4.pyplot(fig2)        
+            st.markdown("________________________________________________")
             figs.append(fig2)
                
             col5, col6 = st.columns(2)
@@ -691,8 +695,9 @@ def app():
             pcm1 = hmPitch1.heatmap(bin_statistic1, ax=hmAxs1['pitch'], cmap='hot', edgecolors='#22312b')
             cbar1 = hmFig1.colorbar(pcm1, ax=hmAxs1['pitch'], shrink=0.6)
             cbar1.outline.set_edgecolor('#efefef')
-            plt.title(f"{player1}'s Shot Density Heat Map")
+            plt.title(f"{player1}'s Shot Density Heat Map", fontsize=16, fontfamily='serif')
             col5.pyplot(hmFig1)
+            #st.markdown("________________________________________________")
             figs.append(hmFig1)
             
             ## heatmap 2
@@ -705,8 +710,9 @@ def app():
             pcm2 = hmPitch2.heatmap(bin_statistic2, ax=hmAxs2['pitch'], cmap='hot', edgecolors='#22312b')
             cbar2 = hmFig2.colorbar(pcm2, ax=hmAxs2['pitch'], shrink=0.6)
             cbar2.outline.set_edgecolor('#efefef')
-            plt.title(f"{player2}'s Shot Density Heat Map")
+            plt.title(f"{player2}'s Shot Density Heat Map", fontsize=16, fontfamily='serif')
             col6.pyplot(hmFig2)  
+            st.markdown("________________________________________________")
             figs.append(hmFig2)
             
             #individual shot outcome 
@@ -721,7 +727,7 @@ def app():
             plt.pie(x=playerPie1['count'], autopct="%.1f%%", explode=[0.01]*lenX, pctdistance=0.7, colors=colors1, \
             textprops=dict(fontsize=16))
             plt.legend(labels1,loc="center left",bbox_to_anchor=(1,0, 5, 1))
-            plt.title("Shot Outcomes", fontsize=16, fontfamily='serif')
+            plt.title(f"{player1}'s Shot Outcomes", fontsize=16, fontfamily='serif')
             plt.tight_layout()
             
             playershots2 = shot_df_split_pl2[shot_df_split_pl2.type=='Shot']
@@ -735,13 +741,12 @@ def app():
             plt.pie(x=playerPie2['count'], autopct="%.1f%%", explode=[0.01]*lenX, pctdistance=0.7, colors=colors2, \
             textprops=dict(fontsize=16))
             plt.legend(labels2,loc="center left",bbox_to_anchor=(1,0, 5, 1))
-            plt.title("Shot Outcomes", fontsize=16, fontfamily='serif')
+            plt.title(f"{player2}'s Shot Outcomes", fontsize=16, fontfamily='serif')
             plt.tight_layout()
-            
-            
             
             col7, col8 = st.columns(2)
             col7.pyplot(figSO1)
+            st.markdown("________________________________________________")
             col8.pyplot(figSO2)
             figs.append(figSO1)
             figs.append(figSO2)
@@ -857,7 +862,8 @@ def app():
             
                 
             ax1 = prop_df1.plot(color= ['#24b1d1', '#ae24d1'], x='Proportion', kind='barh', stacked=True, figsize=(10, 6),title=f'{player1} Contribution', ax=ax1)
-                    
+            plt.xlabel('Percentage %', fontsize=12)
+            plt.title(f'{player1} Contribution', fontsize=16, fontfamily='serif')             
             
             fig_stk2, ax2 = plt.subplots(figsize=[8,8])
             prop_df2 = pd.DataFrame([['Goals', total_goal_player2/total_team_goal*100, (total_team_goal/total_team_goal*100-total_goal_player2/total_team_goal*100)], ['Shots', total_shots_player2/total_shots*100, (total_shots/total_shots*100-total_shots_player2/total_shots*100)], ['XG', xg_player2/xg_total*100, (xg_total/xg_total*100 - xg_player2/xg_total*100)],
@@ -866,87 +872,19 @@ def app():
             
                 
             ax2 = prop_df2.plot(color= ['#24b1d1', '#ae24d1'], x='Proportion', kind='barh', stacked=True, figsize=(10, 6),title=f'{player2} Contribution', ax=ax2)
-            
+            plt.xlabel('Percentage %', fontsize=12)
+            plt.title(f'{player2} Contribution', fontsize=16, fontfamily='serif')     
             
             col9, col10 = st.columns(2)
             col9.pyplot(fig_stk1)
+            st.markdown("________________________________________________")
             col10.pyplot(fig_stk2)
             figs.append(fig_stk1)
             figs.append(fig_stk2)
             
             
-            #######xg vs g per match
-            #
-            #def xgTrend(player):
-            #
-            #    goal_df = shot_df_split_new[(shot_df_split_new['shot_outcome'] == 'Goal' ) & (shot_df_split_new['player'] == player)]
-            #
-            #    num1 = shot_df_split_new.columns.get_loc("shot_outcome")
-            #    
-            #    goal_df['Goal'] =0
-            #    for i in range(len(goal_df)) :
-            #        if goal_df.iloc[i,num1] == 'Goal' :
-            #                    goal_df['Goal'] =1
-            #        else:
-            #            goal_df['Goal'] =0        
-            #    
-            #    actual_goals = goal_df.groupby(['match_id'])['Goal'].sum()
-            #    actual_goals.to_frame()
-            #    actual_goals = actual_goals.to_frame().reset_index()
-            #    
-            #    Expected_goals = goal_df.groupby(['match_id'])['shot_statsbomb_xg'].sum()
-            #    Expected_goals.to_frame()
-            #    Expected_goals = Expected_goals.to_frame().reset_index()
-            #    
-            #    merged_goal_df = pd.merge(Expected_goals, actual_goals,on="match_id",  how='left')
-            #    merged_df = merged_goal_df.fillna(0)
-            #    merged_df['g_c'] = 0
-            #    
-            #    s = 0
-            #    for i in range(len(merged_df)):
-            #        s+= merged_df.iloc[i,2]
-            #        merged_df.iloc[i,3] = s
-            #    
-            #    
-            #    merged_df['xg_c'] = 0
-            #    s = 0
-            #    for i in range(len(merged_df)):
-            #        s+= merged_df.iloc[i,1]
-            #        merged_df.iloc[i,4] = s
-            #    
-            #    actual_goals_c = merged_df.groupby(['match_id'])['g_c'].sum()
-            #    Expected_goals_c = merged_df.groupby(['match_id'])['xg_c'].sum()
-            #    
-            #    
-            #    summary = pd.concat([actual_goals_c, Expected_goals_c], axis=1)
-            #    
-            #    
-            #    return summary
-            #
-            #summary1 = xgTrend(player1)
-            #summary2 = xgTrend(player2)
-            #
-            #fig_trend1, axis1 = plt.subplots(figsize=[8,8])           
-            #axis1 = summary1.plot(ax=axis1)
-            #axis1.set_xlabel('Match ID')
-            #axis1.set_ylabel('Expected goals')
-            #axis1.set_title('Expected Goals VS Actual Goals Per match')
-            #figs.append(axis1)
-            #    
-            #fig_trend2, axis2 = plt.subplots(figsize=[8,8])           
-            #axis2 = summary2.plot(ax=axis2)
-            #axis2.set_xlabel('Match ID')
-            #axis2.set_ylabel('Expected goals')
-            #axis2.set_title('Expected Goals VS Actual Goals Per match')
-            #figs.append(axis1)
-            #
-            #
-            #cols, colt = st.columns(2)
-            #cols.line_chart(summary1)
-            #colt.line_chart(summary2)    
-            
-            
-            export_as_pdf = st.button("Export Visualisations as Report")
+            st.markdown("**Export Visualisations as Report**")
+            export_as_pdf = st.button("Export as pdf")
             
             def create_download_link(val, filename):
                 b64 = base64.b64encode(val)  # val looks like b'...'

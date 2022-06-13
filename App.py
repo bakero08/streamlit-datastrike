@@ -8,6 +8,7 @@ import seaborn as sns
 import math, time
 from statsbombpy import sb
 from PIL import Image
+from fpdf import FPDF
 from mplsoccer.pitch import Pitch, VerticalPitch
 from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
 from imblearn.over_sampling import SMOTE
@@ -15,6 +16,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import classification_report
 from sklearn.model_selection import train_test_split
+from tempfile import NamedTemporaryFile
+import base64
 
 #from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
 #import chart_studio.plotly as py
@@ -55,11 +58,8 @@ def app():
         teamSelect = st.selectbox(
             "Choose the Team:", Teams)
         
-        #crestName = 'FA_WSL/'+teamSelect+'.png'
         
-        #crest = Image.open(crestName)
-        
-        crest = Image.open(f'FA_WSL/{teamSelect}.png')
+        crest = Image.open(f'FA_WSL\{teamSelect}.png')
         col1.image(crest)
         
                 
@@ -365,15 +365,6 @@ def app():
         
         mergedPlayer_finaldf.rename(columns = {'shot_statsbomb_xg':'xG'}, inplace = True)
         
-        #g_p90 = mergedPlayer_finaldf["G_90"].values
-        #xg_p90 = mergedPlayer_finaldf["xg_90"].values
-        #
-        #init_notebook_mode(connected=True)
-        #cf.go_offline()
-        #
-        #fig = mergedPlayer_finaldf.iplot(kind='scatter',x='G_90',y='xg_90', mode='markers',text='Player',size=10, xTitle='Goal per 90',yTitle='xg per 90',title='Goal vs XG p90')
-        #
-        #py.plotly_chart(fig)
         
         
         ##Descriptive for Overview
@@ -381,13 +372,6 @@ def app():
         goals_for= 0
         goals_against= 0
         
-        #Calculate Goals For 
-        
-       # for i in range(len(teamdf)) :
-         #   if teamdf.iloc[i,5]== teamSelect:
-        #        goals_for=goals_for+int(teamdf.iloc[i, 7])
-          #  else:
-           #     goals_for=goals_for+int(teamdf.iloc[i, 8])
         
         #Calculate Goals Against      
                 
@@ -445,40 +429,7 @@ def app():
         colf.metric("Goals Against 🥅",goals_against)
         colg.metric("Goal Difference ➕➖",goalDiff)
         
-        #col_blank, col_blank2 = st.columns(2)
-        #col_blank.markdown("")
         
-        
-        
-        fig = sns.jointplot(data=mergedPlayer_finaldf, x="G_90", y="xg_90", hue = 'Player')
-        fig.fig.suptitle("Individual xG p/90 v. Goals p/90", fontsize=12, fontfamily='serif')
-        
-        goal_dist = mergedPlayer_finaldf['Goal'] - mergedPlayer_finaldf['xG'] 
-        
-        fig3, ax = plt.subplots(figsize=[8,8])
-        ax = sns.barplot(x=mergedPlayer_finaldf['Goal'] - mergedPlayer_finaldf['xG'], y='Player', data=mergedPlayer_finaldf, ax=ax)
-        plt.title("xG Difference from Expectation", fontsize=16, fontfamily='serif')
-        
-        
-        #st.pyplot(fig)
-        #fig, ax_scatter = plt.subplots(figsize=(8,6))
-        #
-        #no_90s = 10
-        #df_fil = mergedPlayer_finaldf[mergedPlayer_finaldf['90s']>=no_90s]
-        ##df_fil = df_fil[df_fil['Pos'].apply(lambda x: x in ['FW','MF,FW','FW,MF'])]
-        #x,y = (df_fil['xG']/df_fil['90s']).to_list(), (df_fil['Goal']/df_fil['90s']).to_list()
-        #ax_scatter.scatter(x,y,alpha=0.3,c='#EF8804')
-        #
-        #df_player = df_fil[df_fil['Player']=='Vivianne Miedema']
-        #ax_scatter.scatter(df_player['xG']/df_player['90s'], df_player['Goal']/df_player['90s'], c='blue')
-        #
-        #ax_scatter.grid(b = True, color ='grey',
-        #            linestyle ='-.', linewidth = 0.5,
-        #            alpha = 0.4)
-        #ax_scatter.set_xlabel('Expected Goals per 90', fontdict = {'fontsize':15, 'weight' : 'bold', 'color':text_color})
-        #ax_scatter.set_ylabel('Goals per 90', fontdict = dict(fontsize = 15, weight = 'bold',color=text_color))
-        #plt.tight_layout()
-        #st.pyplot(fig)
         
         ################### DATA PREPARATION #################################
         
@@ -492,16 +443,13 @@ def app():
         
         
         
-        
-        
+        figs = []
+               
         
         ##SHOT OUTCOME
         shots = shot_df[shot_df.type=='Shot']
         
         pie = shots[['shot_outcome', 'id']].groupby('shot_outcome').count().reset_index().rename(columns={'id': 'count'})
-        #
-        #fig1, ax1 = plt.subplots(figsize=[8,8])
-        #labels1 = pie['shot_outcome']
         
         #Shot outcomes
         fig1, ax1= plt.subplots(figsize=[8,8])
@@ -518,55 +466,42 @@ def app():
         plt.title(f"{teamSelect} Shot Outcomes", fontsize=16, fontfamily='serif')
         plt.tight_layout()
         #plt.show()
-        
-        ##SHOT BODY PART
-        #bar = shots[['shot_body_part', 'id']].groupby('shot_body_part').count().reset_index().rename(columns={'id': 'count'})
-        #sns.set_style("whitegrid")
-        #fig2, ax2 = plt.subplots(figsize=[8,8])
-        #labels2 = bar['shot_body_part']
-        #colors2 = ['#ff9999','#66b3ff','#99ff99','#ffcc99']
-        #ax2 = sns.barplot(x=bar['count'], y=labels2)
-        #ax2.set_yticklabels(labels2, size = 13)
-        #ax2.set_xticks(np.arange(1000,1000,4000))
-        #ax2.set_ylabel(ylabel='player')
-        #plt.title("Shot Body Part", fontsize=25, fontfamily='serif')
-        #plt.tight_layout()
-        #ax2.grid(color='black', linestyle='-', linewidth=0.1, axis='x')
-        
-       
-        
-        #pitch_st = Pitch(pitch_type='statsbomb', half = True, pitch_color='#c7d5cc', line_color='white')
-        #fig_st, ax_st = pitch_st.draw(figsize=(8, 8), constrained_layout=True, tight_layout=False)
-        #
-        #plt.scatter(shot_df_split_new[shot_df_split_new['shot_outcome']=='Goal']['x'],shot_df_split_new[shot_df_split_new['shot_outcome']=='Goal']['y'],
-        #s =np.sqrt(shot_df_split_new[shot_df_split_new['shot_outcome']=='Goal']["shot_statsbomb_xg"])*100 , marker = 'o', facecolor='orange',edgecolor='black', alpha=0.9, label = 'Goal')
-        #plt.title(f"{teamSelect} Shot Map")
-        #
-        #pitch_st.scatter(shot_df_split_new[shot_df_split_new['shot_outcome']!='Goal']['x'],shot_df_split_new[shot_df_split_new['shot_outcome']!='Goal']['y'], 
-        #s=np.sqrt(shot_df_split_new[shot_df_split_new['shot_outcome']!='Goal']['shot_statsbomb_xg'])*100, marker='o', alpha=0.6,label = 'Shots', edgecolor='black', facecolor='grey', ax=ax_st)
-        #ax_st.legend(loc='lower right')
-        #ax_st.text(63,70,'Goals : '+str(len(shot_df_split_new[shot_df_split_new['shot_outcome']=='Goal'])), weight='bold', size=15)
-        #ax_st.text(63,74,f"xG : {round(sum(shot_df_split_new['shot_statsbomb_xg']),2)}", weight='bold', size=15)
-        #ax_st.text(63,78,'Total Shots : '+str(len(shot_df_split_new)), weight='bold', size=15)
-        
-        
+         
+
+        fig = sns.jointplot(data=mergedPlayer_finaldf, x="G_90", y="xg_90", hue = 'Player')
+        fig.fig.suptitle("Individual xG p/90 v. Goals p/90", fontsize=12, fontfamily='serif')
+        fig.set_axis_labels('x', 'y', fontsize=10)
+        fig.ax_joint.set_xlabel('Goals p/90')
+        fig.ax_joint.set_ylabel('xG p/90')
         
         
         col6, col7 = st.columns(2)
-        col6.markdown("The scatter below polt allows one to assess the normalized goal scoring performance of all players in a given squad who scored a goal during the season. Keep in mind that players with lower xG and goals tend to be defenders while attackers have a higher xg and goals p/90 value.")
         col6.pyplot(fig)  
+        figs.append(fig)
+        col6.markdown("The scatter plot above allows one to assess the normalized goal scoring performance of all players in a given squad who scored a goal during the season.")
         col6.markdown("_________________________________________________________________________")
         col7.pyplot(fig1)
-        col7.markdown("The donut chart above includes a cumulative breakdown of a team’s shot outcome")
+        figs.append(fig1)
+        col7.markdown("The donut chart above includes a cumulative breakdown of a team’s shot outcome.")
         
         
+        goal_dist = mergedPlayer_finaldf['Goal'] - mergedPlayer_finaldf['xG'] 
+        
+        fig2, ax = plt.subplots(figsize=[8,8])
+        ax = sns.barplot(x=mergedPlayer_finaldf['Goal'] - mergedPlayer_finaldf['xG'], y='Player', data=mergedPlayer_finaldf, ax=ax)
+        ax.set(xlabel='xG Difference')
+        plt.title("xG Difference from Expectation", fontsize=16, fontfamily='serif')
+        figs.append(fig2)
+        
+        
+        #####SHOT MAP
         
         shotOutcomesVal = shot_df_split_new['shot_outcome'].unique()
         
         shotOutcomeOption = np.insert(shotOutcomesVal,0,'All')
         
         col7.markdown("_____________________________________________________________________________")
-        col7.markdown("The below map allows one to visualize shot outcomes in relation to shot location for the squad.")
+        col7.markdown("This map below allows one to visualize shot outcomes in relation to shot location for the squad.")
         
         shotOutcomeOption = col7.selectbox("Choose shot Type", shotOutcomeOption)
         
@@ -588,6 +523,7 @@ def app():
                 ax_st.text(63,74,f"xG : {round(sum(shot_df_split_new['shot_statsbomb_xg']),2)}", weight='bold', size=15)
                 ax_st.text(63,78,'Total Shots : '+str(len(shot_df_split_new)), weight='bold', size=15)
                 col9.pyplot(fig_st)
+                return fig_st
             
             
         
@@ -605,6 +541,7 @@ def app():
                 #ax_st.text(63,74,f"xG : {round(sum(shot_df_split_new['shot_statsbomb_xg']),2)}", weight='bold', size=15)
                 ax_st.text(63,78,'Total Shots : '+str(len(shot_df_split_new)), weight='bold', size=15)
                 col9.pyplot(fig_st)
+                return fig_st
         
             
             else:
@@ -621,15 +558,87 @@ def app():
                 #ax_st.text(63,74,f"xG : {round(sum(shot_df_split_new['shot_statsbomb_xg']),2)}", weight='bold', size=15)
                 ax_st.text(63,78,'Total Shots : '+str(len(shot_df_split_new)), weight='bold', size=15)
                 col9.pyplot(fig_st)
+                return fig_st
            
         col8, col9 = st.columns((2))
         
         #col9.markdown("The below map allows one to visualize shot outcomes in relation to shot location for the squad.")
-        shotOutcomeGraph(shotOutcomeOption)
+        fig_shotmap = shotOutcomeGraph(shotOutcomeOption)
         
-        col8.pyplot(fig3)
-        col8.markdown("The above histogram allows one to analyze which players are over or under performing their expected goals metric within a squad")
+        col8.pyplot(fig2)
+        #figs.append(fig2)
+        figs.append(fig_shotmap)
+        col8.markdown("The above bar chart allows one to analyze which players are over or under performing their expected goals metric within a squad.")
         
+        
+        #### PLAYER STATS TABLE
+        
+        top_goal_df = shot_df_split_new[(shot_df_split_new['shot_outcome'] == 'Goal' )] 
+
+        num1 = shot_df_split_new.columns.get_loc("shot_outcome")
+        
+        for i in range(len(top_goal_df)) :
+            if goal_df.iloc[i,num1] == 'Goal' :
+                        top_goal_df['Goal'] =1
+            else:
+                top_goal_df['Goal'] =0        
+        
+        player_goals = top_goal_df.groupby(['player'])['Goal'].sum()
+        player_goals = player_goals.to_frame().reset_index()
+        player_goals = player_goals.sort_values('Goal', ascending =False)
+        
+        
+        player_xg = shot_df_split_new.groupby(['player'])['shot_statsbomb_xg'].sum()
+        player_xg = player_xg.to_frame().reset_index()
+        player_xg = player_xg.sort_values('shot_statsbomb_xg', ascending =False)
+        
+        player_stats_df = pd.merge(player_xg,player_goals, on="player",  how='left')
+        player_stats_df = player_stats_df.fillna(0)
+        
+        total_shot_df = shot_df_split_new 
+        
+        
+        for i in range(len(total_shot_df)):
+            total_shot_df['shots'] =1
+                
+        
+        total_shot_df = total_shot_df.groupby(['player'])['shots'].sum()
+        total_shot_df = total_shot_df.to_frame().reset_index()
+        total_shot_df = total_shot_df.sort_values('shots', ascending =False)
+        
+        player_stats_df = pd.merge(player_stats_df,total_shot_df, on="player",  how='left')
+        player_stats_df = player_stats_df.fillna(0)
+        
+        player_stats_df["Shooting Efficiency"] = (player_stats_df["Goal"]/player_stats_df["shots"])*100
+        
+        AgGrid(player_stats_df)
+        
+        
+        
+        
+        
+        
+        ##EXPORT PDF 
+        
+        st.markdown("**Export Visualisations as Report**")
+        export_as_pdf = st.button("Export as pdf")
+            
+        def create_download_link(val, filename):
+            b64 = base64.b64encode(val)  # val looks like b'...'
+            return f'<a href="data:application/octet-stream;base64,{b64.decode()}" download="{filename}.pdf">Download file</a>'
+        
+        
+
+        if export_as_pdf:
+            pdf = FPDF()
+            for fig in figs:
+                pdf.add_page()
+                with NamedTemporaryFile(delete=False, suffix=".png") as tmpfile:
+                    fig.savefig(tmpfile.name)
+                    pdf.image(tmpfile.name, 10, 10, 200, 100)
+            html = create_download_link(pdf.output(dest="S").encode("latin-1"), "report")
+            st.markdown(html, unsafe_allow_html=True)
+            
         
         
         #col9.pyplot(fig_st)
