@@ -694,20 +694,19 @@ def app():
         st.markdown(" The generated table will show an adjusted xG (xg_1) for the shots along with the variables considered for it.")
         run_model = st.button("Run xG Model")
         
-        xg_df = xg_model(shot_df)
         
-        #try:
-        #    if run_model:
-        #        xg_df = xg_model(shot_df)
-        #except IndexError:
-        #        st.info(f"Model not available for {teamSelect} data set hence using Statbomb xG.")        
-        #    
-        #except ValueError:
-        #        st.info(f"Model not available for {teamSelect} data set hence using Statbomb xG.")        
-        #
-        #except KeyError:
-        #        st.info(f"Model not available for {teamSelect} data set hence using Statbomb xG.")        
-        #
+        try:
+            if run_model:
+                xg_df = xg_model(shot_df)
+        except IndexError:
+                st.info(f"Model not available for {teamSelect} data set hence using Statbomb xG.")        
+            
+        except ValueError:
+                st.info(f"Model not available for {teamSelect} data set hence using Statbomb xG.")        
+        
+        except KeyError:
+                st.info(f"Model not available for {teamSelect} data set hence using Statbomb xG.")        
+        
         
         #col9.pyplot(fig_st)
         
