@@ -286,7 +286,7 @@ def app():
             data['is_goal'] = shot_df_split_new['is_goal']
             #data
             datatest = data
-            
+            datatest = datatest.fillna(0)
             #train_test_split
             
             X = datatest.iloc[:,:-1]
